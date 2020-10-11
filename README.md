@@ -6,5 +6,9 @@ A plugin to track first join and last logout times. This is my first attempt at 
 - Super easy setup. Drop plugin into `plugins` folder. Setup the config and restart your server.
 - Imports from current player data. Bukkit tracks this information, but it's a bit weird.
 - Use `/ptreload` to reload the plugin.
+
+![Image](https://raw.githubusercontent.com/DESTROYMC-NET/PlayerTracker/master/image1.png)
+
+![Image](https://raw.githubusercontent.com/DESTROYMC-NET/PlayerTracker/master/image2.png)
 ## Download
 To download the latest build, head over to the [Actions](https://github.com/DESTROYMC-NET/PlayerTracker/actions) page and grab the latest build. It will download a zip file. Inside the zip file is the jar file.
