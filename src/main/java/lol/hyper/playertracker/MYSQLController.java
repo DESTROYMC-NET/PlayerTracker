@@ -53,7 +53,6 @@ public class MYSQLController {
             ResultSet tables = dbm.getTables(null, null, "playerhistory", null);
             if (tables.next()) {
                 Bukkit.getLogger().info("[PlayerTracker] We found the correct table. Everything is good!");
-                PlayerTracker.getInstance().finishedSetup = true;
             } else {
                 Bukkit.getLogger().info("[PlayerTracker] Creating table for players...");
                 String CREATE_TABLE = "CREATE TABLE `playerhistory` (" +
@@ -72,8 +71,8 @@ public class MYSQLController {
                     imported++;
                 }
                 Bukkit.getLogger().info("[PlayerTracker] I have imported " + imported + " players!");
-                PlayerTracker.getInstance().finishedSetup = true;
             }
+            PlayerTracker.getInstance().finishedSetup = true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

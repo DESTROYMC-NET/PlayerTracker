@@ -39,7 +39,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         this.getCommand("ptreload").setExecutor(new CommandReload());
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
-        Bukkit.getScheduler().runTaskLater(this, MYSQLController::databaseSetup, 100);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, MYSQLController::databaseSetup, 100);
     }
 
     @Override

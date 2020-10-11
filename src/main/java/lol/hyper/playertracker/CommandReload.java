@@ -14,7 +14,7 @@ public class CommandReload implements CommandExecutor {
             commandSender.sendMessage(ChatColor.GREEN + "Config was reloaded!");
             MYSQLController.disconnect();
             MYSQLController.connect();
-            Bukkit.getScheduler().runTaskLater(PlayerTracker.getInstance(), MYSQLController::databaseSetup, 100);
+            Bukkit.getScheduler().runTaskLaterAsynchronously(PlayerTracker.getInstance(), MYSQLController::databaseSetup, 100);
         } else {
             commandSender.sendMessage(ChatColor.RED + "You do not have permission to reload!");
         }
