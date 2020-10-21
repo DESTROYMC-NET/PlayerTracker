@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class MYSQLController {
 
-    private PlayerTracker playerTracker;
+    private final PlayerTracker playerTracker;
 
     public MYSQLController(PlayerTracker playerTracker) {
         this.playerTracker = playerTracker;
