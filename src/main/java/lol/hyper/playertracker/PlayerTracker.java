@@ -16,30 +16,29 @@ import java.sql.SQLException;
 
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
-    private static PlayerTracker instance;
     public FileConfiguration config;
     public boolean finishedSetup = false;
     public final File configFile = new File(getDataFolder(), "config.yml");
 
-    public static PlayerTracker getInstance() {
-        return instance;
-    }
+    public CommandReload commandReload;
+    public MYSQLController mysqlController;
 
     @Override
     public void onEnable() {
-        instance = this;
+        mysqlController = new MYSQLController(this);
+        commandReload = new CommandReload(this, mysqlController);
         loadConfig(configFile);
         if (config.getString("mysql.database").equalsIgnoreCase("database")) {
             Bukkit.getLogger().severe("[PlayerTracker] It looks like you have not configured your database settings. Please edit your config.yml file!");
             Bukkit.getPluginManager().disablePlugin(this);
         } else {
-            MYSQLController.connect();
+            mysqlController.connect();
         }
-        this.getCommand("player").setExecutor(new CommandPlayer());
-        this.getCommand("ptreload").setExecutor(new CommandReload());
+        this.getCommand("player").setExecutor(new CommandPlayer(mysqlController));
+        this.getCommand("ptreload").setExecutor(commandReload);
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this, MYSQLController::databaseSetup, 100);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, mysqlController::databaseSetup, 100);
     }
 
     @Override
@@ -47,13 +46,13 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         if (Bukkit.getOnlinePlayers().size() > 0) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 try {
-                    MYSQLController.updateLastLogin(player.getUniqueId());
+                    mysqlController.updateLastLogin(player.getUniqueId());
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
         }
-        MYSQLController.disconnect();
+        mysqlController.disconnect();
     }
 
     public void loadConfig(File file) {
@@ -73,7 +72,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         if (!player.hasPlayedBefore()) {
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
                 try {
-                    MYSQLController.addNewPlayer(player.getUniqueId());
+                    mysqlController.addNewPlayer(player.getUniqueId());
                     Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -87,7 +86,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try {
-                MYSQLController.updateLastLogin(player.getUniqueId());
+                mysqlController.updateLastLogin(player.getUniqueId());
             } catch (SQLException e) {
                 e.printStackTrace();
             }

@@ -8,22 +8,28 @@ import java.util.UUID;
 
 public class MYSQLController {
 
+    private PlayerTracker playerTracker;
+
+    public MYSQLController(PlayerTracker playerTracker) {
+        this.playerTracker = playerTracker;
+    }
+
     static String url;
     private static Connection con;
 
-    private static void buildURL() {
-        String database = PlayerTracker.getInstance().config.getString("mysql.database");
-        String host = PlayerTracker.getInstance().config.getString("mysql.host");
-        int port = PlayerTracker.getInstance().config.getInt("mysql.port");
-        String flags = PlayerTracker.getInstance().config.getString("mysql.flags");
+    private void buildURL() {
+        String database = playerTracker.config.getString("mysql.database");
+        String host = playerTracker.config.getString("mysql.host");
+        int port = playerTracker.config.getInt("mysql.port");
+        String flags = playerTracker.config.getString("mysql.flags");
         url = "jdbc:mysql://" + host + ":" + port + "/" + database + flags;
     }
 
-    public static void connect() {
-        String username = PlayerTracker.getInstance().config.getString("mysql.username");
-        String password = PlayerTracker.getInstance().config.getString("mysql.password");
+    public void connect() {
+        String username = playerTracker.config.getString("mysql.username");
+        String password = playerTracker.config.getString("mysql.password");
         buildURL();
-        Bukkit.getScheduler().runTaskAsynchronously(PlayerTracker.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(playerTracker, () -> {
             if (con != null) {
                 try {
                     con.close();
@@ -39,15 +45,15 @@ public class MYSQLController {
         });
     }
 
-    public static void disconnect() {
+    public void disconnect() {
         try {
             con.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void databaseSetup() {
+    public void databaseSetup() {
         try {
             DatabaseMetaData dbm = con.getMetaData();
             ResultSet tables = dbm.getTables(null, null, "playerhistory", null);
@@ -72,13 +78,13 @@ public class MYSQLController {
                 }
                 Bukkit.getLogger().info("[PlayerTracker] I have imported " + imported + " players!");
             }
-            PlayerTracker.getInstance().finishedSetup = true;
+            playerTracker.finishedSetup = true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public static String lookUpFirstJoin(UUID uuid) throws SQLException {
+    public String lookUpFirstJoin(UUID uuid) throws SQLException {
         String SQL_SORT = "SELECT first_join FROM playerhistory WHERE uuid=" + "'" + uuid.toString() + "'";
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(SQL_SORT);
@@ -91,7 +97,7 @@ public class MYSQLController {
         return em;
     }
 
-    public static String lookUpLastLogin(UUID uuid) throws SQLException {
+    public String lookUpLastLogin(UUID uuid) throws SQLException {
         String SQL_SORT = "SELECT last_login FROM playerhistory WHERE uuid=" + "'" + uuid.toString() + "'";
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(SQL_SORT);
@@ -104,7 +110,7 @@ public class MYSQLController {
         return em;
     }
 
-    public static void updateLastLogin(UUID uuid) throws SQLException {
+    public void updateLastLogin(UUID uuid) throws SQLException {
         String SQL_UPDATE = "UPDATE playerhistory SET last_login=? WHERE uuid=?";
         PreparedStatement preparedStatement = con.prepareStatement(SQL_UPDATE);
         preparedStatement.setString(1, Long.toString(System.currentTimeMillis()));
@@ -112,7 +118,7 @@ public class MYSQLController {
         preparedStatement.executeUpdate();
     }
 
-    public static void addNewPlayer(UUID uuid) throws SQLException {
+    public void addNewPlayer(UUID uuid) throws SQLException {
         String SQL_UPDATE = "INSERT INTO playerhistory (uuid, first_join, last_login)" + "VALUES (?, ?, ?)";
         PreparedStatement preparedStatement = con.prepareStatement(SQL_UPDATE);
         preparedStatement.setString(1, uuid.toString());
@@ -121,7 +127,7 @@ public class MYSQLController {
         preparedStatement.executeUpdate();
     }
 
-    public static void importPlayer(UUID uuid) throws SQLException {
+    public void importPlayer(UUID uuid) throws SQLException {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
         String SQL_UPDATE = "INSERT INTO playerhistory (uuid, first_join, last_login)" + "VALUES (?, ?, ?)";
         PreparedStatement preparedStatement = con.prepareStatement(SQL_UPDATE);
