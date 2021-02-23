@@ -1,3 +1,20 @@
+/*
+ * This file is part of PlayerTracker.
+ *
+ * PlayerTracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * PlayerTracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PlayerTracker.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package lol.hyper.playertracker;
 
 import org.bukkit.Bukkit;
@@ -21,12 +38,14 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     public final File configFile = new File(getDataFolder(), "config.yml");
 
     public CommandReload commandReload;
+    public CommandPlayer commandPlayer;
     public MYSQLController mysqlController;
 
     @Override
     public void onEnable() {
         mysqlController = new MYSQLController(this);
-        commandReload = new CommandReload(this, mysqlController);
+        commandReload = new CommandReload(this);
+        commandPlayer = new CommandPlayer(mysqlController);
         loadConfig(configFile);
         if (config.getString("mysql.database").equalsIgnoreCase("database")) {
             Bukkit.getLogger().severe("[PlayerTracker] It looks like you have not configured your database settings. Please edit your config.yml file!");
@@ -34,7 +53,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         } else {
             mysqlController.connect();
         }
-        this.getCommand("player").setExecutor(new CommandPlayer(mysqlController));
+        this.getCommand("player").setExecutor(commandPlayer);
         this.getCommand("ptreload").setExecutor(commandReload);
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
 

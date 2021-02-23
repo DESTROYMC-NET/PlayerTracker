@@ -1,5 +1,5 @@
 # PlayerTracker
-![Build with Maven](https://github.com/DESTROYMC-NET/PlayerTracker/workflows/Build%20with%20Maven/badge.svg)
+![Build with Maven](https://github.com/DESTROYMC-NET/PlayerTracker/workflows/Build%20with%20Maven/badge.svg) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 A plugin to track first join and last logout times. This is my first attempt at using databases, so shit might hit the fan.
 ## Features
