@@ -17,6 +17,9 @@
 
 package lol.hyper.playertracker;
 
+import lol.hyper.playertracker.commands.CommandPlayer;
+import lol.hyper.playertracker.commands.CommandReload;
+import lol.hyper.playertracker.tools.MYSQLController;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,12 +33,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
     public FileConfiguration config;
     public boolean finishedSetup = false;
     public final File configFile = new File(getDataFolder(), "config.yml");
+    public final Logger logger = this.getLogger();
 
     public CommandReload commandReload;
     public CommandPlayer commandPlayer;
@@ -48,7 +53,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         commandPlayer = new CommandPlayer(mysqlController);
         loadConfig(configFile);
         if (config.getString("mysql.database").equalsIgnoreCase("database")) {
-            Bukkit.getLogger().severe("[PlayerTracker] It looks like you have not configured your database settings. Please edit your config.yml file!");
+            logger.severe("It looks like you have not configured your database settings. Please edit your config.yml file!");
             Bukkit.getPluginManager().disablePlugin(this);
         } else {
             mysqlController.connect();
