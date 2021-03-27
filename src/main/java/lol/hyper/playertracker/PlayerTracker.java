@@ -68,7 +68,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (Bukkit.getOnlinePlayers().size() > 0) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player: Bukkit.getOnlinePlayers()) {
                 try {
                     mysqlController.updateLastLogin(player.getUniqueId());
                 } catch (SQLException throwables) {
@@ -95,12 +95,12 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         }
         if (!player.hasPlayedBefore()) {
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                try {
-                    mysqlController.addNewPlayer(player.getUniqueId());
-                    Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                mysqlController.addNewPlayer(player.getUniqueId());
+                Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             });
         }
     }
@@ -109,11 +109,11 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     public void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            try {
-                mysqlController.updateLastLogin(player.getUniqueId());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            mysqlController.updateLastLogin(player.getUniqueId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         });
     }
 }
