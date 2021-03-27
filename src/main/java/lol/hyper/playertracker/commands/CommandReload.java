@@ -53,12 +53,12 @@ public class CommandReload implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (commandSender.isOp() || commandSender.hasPermission("playertracker.reload")) {
             playerTracker.loadConfig(playerTracker.configFile);
-            commandSender.sendMessage(ChatColor.GREEN + "Config was reloaded!");
+            commandSender.sendMessage(ChatColor.GREEN + "Configuration was reloaded.");
             playerTracker.mysqlController.disconnect();
             playerTracker.mysqlController.connect();
             Bukkit.getScheduler().runTaskLaterAsynchronously(playerTracker, playerTracker.mysqlController::databaseSetup, 100);
         } else {
-            commandSender.sendMessage(ChatColor.RED + "You do not have permission to reload!");
+            commandSender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
         }
         return true;
     }
