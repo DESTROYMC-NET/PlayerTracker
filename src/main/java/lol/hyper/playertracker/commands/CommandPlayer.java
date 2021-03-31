@@ -34,6 +34,7 @@
 
 package lol.hyper.playertracker.commands;
 
+import lol.hyper.playertracker.PlayerTracker;
 import lol.hyper.playertracker.tools.MYSQLController;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -79,7 +80,7 @@ public class CommandPlayer implements CommandExecutor {
                     joinDateString = simpleDateFormat.format(joinDate);
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                     sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
-                    if (Bukkit.getServer().getPlayerExact(args[0]) != null) {
+                    if (Bukkit.getServer().getPlayerExact(args[0]) != null && !PlayerTracker.isVanished(args[0])) {
                         sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " is currently online.\n");
                     } else {
                         sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");

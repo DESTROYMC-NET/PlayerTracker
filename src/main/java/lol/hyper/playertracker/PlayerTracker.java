@@ -29,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -115,5 +116,22 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
         });
+    }
+
+    /**
+     * @param player player to check if vanished
+     * @return returns if player is vanished or not
+     */
+    public static boolean isVanished(String player) {
+        if (Bukkit.getPlayerExact(player) == null) {
+            return false;
+        } else {
+            Player player2 = Bukkit.getPlayerExact(player);
+            assert player2 != null;
+            for (MetadataValue meta : player2.getMetadata("vanished")) {
+                if (meta.asBoolean()) return true;
+            }
+        }
+        return false;
     }
 }
