@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -88,12 +89,15 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void loginEvent(PlayerLoginEvent event) {
+        if (!finishedSetup) {
+            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "PlayerTracker has not finished setting up! Please wait a few.");
+        }
+    }
+
+    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!finishedSetup) {
-            player.kickPlayer(ChatColor.RED + "PlayerTracker has not finished setting up! Please wait a few.");
-            return;
-        }
         if (!player.hasPlayedBefore()) {
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try {
