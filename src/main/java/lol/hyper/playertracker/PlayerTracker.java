@@ -113,13 +113,15 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-        try {
-            mysqlController.updateLastLogin(player.getUniqueId());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!isVanished(player.getName())) {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                try {
+                    mysqlController.updateLastLogin(player.getUniqueId());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
         }
-        });
     }
 
     /**
