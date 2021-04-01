@@ -51,6 +51,7 @@ public class MYSQLController {
 
     static String url;
     private static Connection con;
+    public boolean finishedSetup = false;
 
     private void buildURL() {
         String database = playerTracker.config.getString("mysql.database");
@@ -113,7 +114,7 @@ public class MYSQLController {
                 }
                 Bukkit.getLogger().info("[PlayerTracker] I have imported " + imported + " players!");
             }
-            playerTracker.finishedSetup = true;
+            finishedSetup = true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

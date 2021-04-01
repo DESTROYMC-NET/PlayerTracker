@@ -40,19 +40,20 @@ import java.util.logging.Logger;
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
     public FileConfiguration config;
-    public boolean finishedSetup = false;
     public final File configFile = new File(getDataFolder(), "config.yml");
     public final Logger logger = this.getLogger();
 
     public CommandReload commandReload;
     public CommandPlayer commandPlayer;
     public MYSQLController mysqlController;
+    public Events events;
 
     @Override
     public void onEnable() {
         mysqlController = new MYSQLController(this);
         commandReload = new CommandReload(this);
-        commandPlayer = new CommandPlayer(mysqlController);
+        commandPlayer = new CommandPlayer(this);
+        events = new Events(this);
         loadConfig(configFile);
         if (config.getString("mysql.database").equalsIgnoreCase("database")) {
             logger.severe("It looks like you have not configured your database settings. Please edit your config.yml file!");
@@ -86,42 +87,6 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
             this.saveResource("config.yml", true);
         }
         config = YamlConfiguration.loadConfiguration(file);
-    }
-
-    @EventHandler
-    public void loginEvent(PlayerLoginEvent event) {
-        if (!finishedSetup) {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "PlayerTracker has not finished setting up! Please wait a few.");
-        }
-    }
-
-    @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        if (!player.hasPlayedBefore()) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            try {
-                mysqlController.addNewPlayer(player.getUniqueId());
-                Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            });
-        }
-    }
-
-    @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        if (!isVanished(player.getName())) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                try {
-                    mysqlController.updateLastLogin(player.getUniqueId());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
     }
 
     /**

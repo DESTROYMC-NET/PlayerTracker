@@ -50,10 +50,10 @@ import java.util.UUID;
 
 public class CommandPlayer implements CommandExecutor {
 
-    private final MYSQLController mysqlController;
+    private final PlayerTracker playerTracker;
 
-    public CommandPlayer(MYSQLController mysqlController) {
-        this.mysqlController = mysqlController;
+    public CommandPlayer(PlayerTracker playerTracker) {
+        this.playerTracker = playerTracker;
     }
 
     final String pattern = "MM/dd/yyyy HH:mm:ss";
@@ -70,13 +70,13 @@ public class CommandPlayer implements CommandExecutor {
         if (argsLength == 1) {
             UUID uuid = Bukkit.getOfflinePlayer(args[0]).getUniqueId();
             try {
-                if (mysqlController.lookUpFirstJoin(uuid) == null) {
+                if (playerTracker.mysqlController.lookUpFirstJoin(uuid) == null) {
                     sender.sendMessage(ChatColor.RED + "Player was not found. Maybe they changed their username?");
                     return true;
                 } else {
-                    lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(mysqlController.lookUpLastLogin(uuid))));
+                    lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpLastLogin(uuid))));
                     lastPlayedString = simpleDateFormat.format(lastPlayed);
-                    joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(mysqlController.lookUpFirstJoin(uuid))));
+                    joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpFirstJoin(uuid))));
                     joinDateString = simpleDateFormat.format(joinDate);
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                     sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
