@@ -104,7 +104,7 @@ public class JSONController {
     public String getFirstJoin(UUID player) {
         File playerFile = getPlayerFile(player);
         JSONObject playerJSON = readFile(playerFile);
-        return playerJSON.get("firstjoin").toString();
+        return playerJSON.get("firstlogin").toString();
     }
 
     public String getLastLogin(UUID player) {
@@ -130,9 +130,9 @@ public class JSONController {
 
     public boolean doesPlayerExist(UUID player) {
         File[] listOfFiles = playerTracker.dataFolder.toFile().listFiles();
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile()) {
-                if (player.toString().equals(listOfFiles[i].getName())) {
+        for (File listOfFile : listOfFiles) {
+            if (listOfFile.isFile()) {
+                if (player.toString().equals(listOfFile.getName().replace(".json", ""))) {
                     return true;
                 }
             }

@@ -60,7 +60,7 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         loadConfig(configFile);
         this.getCommand("player").setExecutor(commandPlayer);
         this.getCommand("ptreload").setExecutor(commandReload);
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getServer().getPluginManager().registerEvents(events, this);
     }
 
     @Override
