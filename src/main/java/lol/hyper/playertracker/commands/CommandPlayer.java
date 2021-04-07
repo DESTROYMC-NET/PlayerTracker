@@ -91,6 +91,7 @@ public class CommandPlayer implements CommandExecutor {
             } catch (SQLException e) {
                 sender.sendMessage(ChatColor.RED + "There was an error retrieving player data.");
                 e.printStackTrace();
+                playerTracker.mysqlController.connect();
                 return true;
             }
         }

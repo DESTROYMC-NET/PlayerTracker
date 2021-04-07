@@ -37,8 +37,10 @@ package lol.hyper.playertracker.tools;
 import lol.hyper.playertracker.PlayerTracker;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class MYSQLController {
@@ -50,8 +52,10 @@ public class MYSQLController {
     }
 
     static String url;
-    private static Connection con;
+    public Connection con;
     public boolean finishedSetup = false;
+    public HashMap<Player, Long> quitTasks = new HashMap<>();
+    public HashMap<Player, Long> joinTasks = new HashMap<>();
 
     private void buildURL() {
         String database = playerTracker.config.getString("mysql.database");
@@ -77,6 +81,7 @@ public class MYSQLController {
                 con = DriverManager.getConnection(url, username, password);
             } catch (SQLException e) {
                 e.printStackTrace();
+                connect();
             }
         });
     }
@@ -120,6 +125,26 @@ public class MYSQLController {
         }
     }
 
+    public void doTasks() {
+        Bukkit.getScheduler().runTaskAsynchronously(playerTracker, () -> {
+            connect(); // just force a reconnect
+            if (joinTasks.size() != 0) {
+                for (Player player : joinTasks.keySet()) {
+                    long time = joinTasks.get(player);
+                    addNewPlayer(player.getUniqueId(), time);
+                    joinTasks.remove(player);
+                }
+            }
+            if (quitTasks.size() != 0) {
+                for (Player player : quitTasks.keySet()) {
+                    long time = quitTasks.get(player);
+                    updateLastLogin(player.getUniqueId(), time);
+                    quitTasks.remove(player);
+                }
+            }
+        });
+    }
+
     public String lookUpFirstJoin(UUID uuid) throws SQLException {
         String SQL_SORT = "SELECT first_join FROM playerhistory WHERE uuid=" + "'" + uuid.toString() + "'";
         Statement stmt = con.createStatement();
@@ -146,21 +171,31 @@ public class MYSQLController {
         return em;
     }
 
-    public void updateLastLogin(UUID uuid) throws SQLException {
+    public void updateLastLogin(UUID uuid, long time) {
         String SQL_UPDATE = "UPDATE playerhistory SET last_login=? WHERE uuid=?";
-        PreparedStatement preparedStatement = con.prepareStatement(SQL_UPDATE);
-        preparedStatement.setString(1, Long.toString(System.currentTimeMillis()));
-        preparedStatement.setString(2, uuid.toString());
-        preparedStatement.executeUpdate();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = con.prepareStatement(SQL_UPDATE);
+            preparedStatement.setString(1, Long.toString(System.currentTimeMillis()));
+            preparedStatement.setString(2, uuid.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    public void addNewPlayer(UUID uuid) throws SQLException {
+    public void addNewPlayer(UUID uuid, long time) {
         String SQL_UPDATE = "INSERT INTO playerhistory (uuid, first_join, last_login)" + "VALUES (?, ?, ?)";
-        PreparedStatement preparedStatement = con.prepareStatement(SQL_UPDATE);
-        preparedStatement.setString(1, uuid.toString());
-        preparedStatement.setString(2, Long.toString(System.currentTimeMillis()));
-        preparedStatement.setString(3, Long.toString(System.currentTimeMillis()));
-        preparedStatement.executeUpdate();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = con.prepareStatement(SQL_UPDATE);
+            preparedStatement.setString(1, uuid.toString());
+            preparedStatement.setString(2, Long.toString(time));
+            preparedStatement.setString(3, Long.toString(time));
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     public void importPlayer(UUID uuid) throws SQLException {

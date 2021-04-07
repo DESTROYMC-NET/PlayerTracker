@@ -25,7 +25,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.sql.SQLException;
 
 public class Events implements Listener {
 
@@ -46,14 +45,8 @@ public class Events implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPlayedBefore()) {
-            Bukkit.getScheduler().runTaskAsynchronously(playerTracker, () -> {
-                try {
-                    playerTracker.mysqlController.addNewPlayer(player.getUniqueId());
-                    Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            });
+            playerTracker.mysqlController.joinTasks.put(player, System.currentTimeMillis());
+            Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
         }
     }
 
@@ -61,13 +54,7 @@ public class Events implements Listener {
     public void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (!PlayerTracker.isVanished(player.getName())) {
-            Bukkit.getScheduler().runTaskAsynchronously(playerTracker, () -> {
-                try {
-                    playerTracker.mysqlController.updateLastLogin(player.getUniqueId());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            });
+            playerTracker.mysqlController.quitTasks.put(player, System.currentTimeMillis());
         }
     }
 }

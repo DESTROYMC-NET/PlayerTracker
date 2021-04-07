@@ -66,18 +66,14 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, mysqlController::databaseSetup, 100);
+
+        Bukkit.getScheduler().runTaskTimer(this, () -> mysqlController.doTasks(), 0, 120);
     }
 
     @Override
     public void onDisable() {
         if (Bukkit.getOnlinePlayers().size() > 0) {
-            for (Player player: Bukkit.getOnlinePlayers()) {
-                try {
-                    mysqlController.updateLastLogin(player.getUniqueId());
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            mysqlController.doTasks();
         }
         mysqlController.disconnect();
     }
