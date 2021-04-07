@@ -51,14 +51,40 @@ public class CommandPlayer implements CommandExecutor {
         int argsLength = args.length;
         if (argsLength == 1) {
             UUID uuid = Bukkit.getOfflinePlayer(args[0]).getUniqueId();
-            try {
-                if (playerTracker.mysqlController.lookUpFirstJoin(uuid) == null) {
+            if (playerTracker.usingMYSQL) {
+                try {
+                    if (playerTracker.mysqlController.lookUpFirstJoin(uuid) == null) {
+                        sender.sendMessage(ChatColor.RED + "Player was not found. Maybe they changed their username?");
+                        return true;
+                    } else {
+                        lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpLastLogin(uuid))));
+                        lastPlayedString = simpleDateFormat.format(lastPlayed);
+                        joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpFirstJoin(uuid))));
+                        joinDateString = simpleDateFormat.format(joinDate);
+                        sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
+                        sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
+                        if (Bukkit.getServer().getPlayerExact(args[0]) != null && !PlayerTracker.isVanished(args[0])) {
+                            sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " is currently online.\n");
+                        } else {
+                            sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");
+                        }
+                        sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
+                    }
+                    return true;
+                } catch (SQLException e) {
+                    sender.sendMessage(ChatColor.RED + "There was an error retrieving player data.");
+                    e.printStackTrace();
+                    playerTracker.mysqlController.connect();
+                    return true;
+                }
+            } else {
+                if (!playerTracker.jsonController.doesPlayerExist(uuid)) {
                     sender.sendMessage(ChatColor.RED + "Player was not found. Maybe they changed their username?");
                     return true;
                 } else {
-                    lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpLastLogin(uuid))));
+                    lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getLastLogin(uuid))));
                     lastPlayedString = simpleDateFormat.format(lastPlayed);
-                    joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpFirstJoin(uuid))));
+                    joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getFirstJoin(uuid))));
                     joinDateString = simpleDateFormat.format(joinDate);
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                     sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
@@ -69,11 +95,6 @@ public class CommandPlayer implements CommandExecutor {
                     }
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                 }
-                return true;
-            } catch (SQLException e) {
-                sender.sendMessage(ChatColor.RED + "There was an error retrieving player data.");
-                e.printStackTrace();
-                playerTracker.mysqlController.connect();
                 return true;
             }
         }

@@ -1,3 +1,7 @@
+# Choose which storage option you wanna use.
+# Options: json/mysql
+storage-type: "json"
+
 mysql:
   database: "database"
   host: "localhost"

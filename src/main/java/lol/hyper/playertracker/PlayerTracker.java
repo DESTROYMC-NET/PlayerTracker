@@ -19,6 +19,7 @@ package lol.hyper.playertracker;
 
 import lol.hyper.playertracker.commands.CommandPlayer;
 import lol.hyper.playertracker.commands.CommandReload;
+import lol.hyper.playertracker.tools.JSONController;
 import lol.hyper.playertracker.tools.MYSQLController;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -29,18 +30,25 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
     public FileConfiguration config;
     public final File configFile = new File(getDataFolder(), "config.yml");
+    public final Path dataFolder = Paths.get(getDataFolder() + File.separator + "data");
     public final Logger logger = this.getLogger();
+    public boolean usingMYSQL = false;
 
     public CommandReload commandReload;
     public CommandPlayer commandPlayer;
     public MYSQLController mysqlController;
     public Events events;
+    public JSONController jsonController;
 
     @Override
     public void onEnable() {
@@ -48,28 +56,21 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         commandReload = new CommandReload(this);
         commandPlayer = new CommandPlayer(this);
         events = new Events(this);
+        jsonController = new JSONController(this);
         loadConfig(configFile);
-        if (config.getString("mysql.database").equalsIgnoreCase("database")) {
-            logger.severe("It looks like you have not configured your database settings. Please edit your config.yml file!");
-            Bukkit.getPluginManager().disablePlugin(this);
-        } else {
-            mysqlController.connect();
-        }
         this.getCommand("player").setExecutor(commandPlayer);
         this.getCommand("ptreload").setExecutor(commandReload);
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
-
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this, mysqlController::databaseSetup, 100);
-
-        Bukkit.getScheduler().runTaskTimer(this, () -> mysqlController.doTasks(), 0, 120);
     }
 
     @Override
     public void onDisable() {
-        if (Bukkit.getOnlinePlayers().size() > 0) {
-            mysqlController.doTasks();
+        if (usingMYSQL) {
+            if (Bukkit.getOnlinePlayers().size() > 0) {
+                mysqlController.doTasks();
+            }
+            mysqlController.disconnect();
         }
-        mysqlController.disconnect();
     }
 
     public void loadConfig(File file) {
@@ -77,6 +78,29 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
             this.saveResource("config.yml", true);
         }
         config = YamlConfiguration.loadConfiguration(file);
+        if (config.getString("storage-type").equalsIgnoreCase("mysql")) {
+            if (config.getString("mysql.database").equalsIgnoreCase("database")) {
+                logger.severe("It looks like you have not configured your database settings. Please edit your config.yml file!");
+                Bukkit.getPluginManager().disablePlugin(this);
+            } else {
+                usingMYSQL = true;
+                mysqlController.connect();
+                Bukkit.getScheduler().runTaskLaterAsynchronously(this, mysqlController::databaseSetup, 100);
+                Bukkit.getScheduler().runTaskTimer(this, () -> mysqlController.doTasks(), 0, 120);
+            }
+        } else {
+            usingMYSQL = false;
+            if (!dataFolder.toFile().exists()) {
+                try {
+                    Files.createDirectory(dataFolder);
+                } catch (IOException e) {
+                    logger.severe("Unable to create " + dataFolder.toAbsolutePath());
+                    e.printStackTrace();
+                }
+                // convert bukkit -> json
+                jsonController.convertBukkitToStorage();
+            }
+        }
     }
 
     /**

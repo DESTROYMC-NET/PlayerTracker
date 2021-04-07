@@ -45,7 +45,11 @@ public class Events implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPlayedBefore()) {
-            playerTracker.mysqlController.joinTasks.put(player, System.currentTimeMillis());
+            if (playerTracker.usingMYSQL) {
+                playerTracker.mysqlController.joinTasks.put(player, System.currentTimeMillis());
+            } else {
+                playerTracker.jsonController.setFirstJoin(player.getUniqueId());
+            }
             Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
         }
     }
@@ -54,7 +58,11 @@ public class Events implements Listener {
     public void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (!PlayerTracker.isVanished(player.getName())) {
-            playerTracker.mysqlController.quitTasks.put(player, System.currentTimeMillis());
+            if (playerTracker.usingMYSQL) {
+                playerTracker.mysqlController.quitTasks.put(player, System.currentTimeMillis());
+            } else {
+                playerTracker.jsonController.updateLastLogin(player.getUniqueId());
+            }
         }
     }
 }
