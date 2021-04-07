@@ -36,8 +36,10 @@ public class Events implements Listener {
 
     @EventHandler
     public void loginEvent(PlayerLoginEvent event) {
-        if (!playerTracker.mysqlController.finishedSetup) {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "PlayerTracker has not finished setting up! Please wait a few.");
+        if (playerTracker.usingMYSQL) {
+            if (!playerTracker.mysqlController.finishedSetup) {
+                event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "PlayerTracker has not finished setting up! Please wait a few.");
+            }
         }
     }
 
