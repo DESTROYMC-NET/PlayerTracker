@@ -123,8 +123,9 @@ public class JSONController {
 
     public void setFirstJoin(UUID player) {
         File playerFile = getPlayerFile(player);
-        JSONObject playerJSON = readFile(playerFile);
+        JSONObject playerJSON = new JSONObject();
         playerJSON.put("firstlogin", Long.toString(System.currentTimeMillis()));
+        playerJSON.put("lastlogin", Long.toString(System.currentTimeMillis()));
         writeFile(playerFile, playerJSON.toJSONString());
     }
 
