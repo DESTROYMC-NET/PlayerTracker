@@ -15,23 +15,6 @@
  * along with PlayerTracker.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * This file is part of PlayerTracker.
- *
- * PlayerTracker is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * PlayerTracker is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with PlayerTracker.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package lol.hyper.playertracker.tools;
 
 import lol.hyper.playertracker.PlayerTracker;
@@ -54,8 +37,8 @@ public class MYSQLController {
     static String url;
     public Connection con;
     public boolean finishedSetup = false;
-    public HashMap<Player, Long> quitTasks = new HashMap<>();
-    public HashMap<Player, Long> joinTasks = new HashMap<>();
+    public final HashMap<Player, Long> quitTasks = new HashMap<>();
+    public final HashMap<Player, Long> joinTasks = new HashMap<>();
 
     private void buildURL() {
         String database = playerTracker.config.getString("mysql.database");
