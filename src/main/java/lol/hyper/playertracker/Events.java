@@ -25,7 +25,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-
 public class Events implements Listener {
 
     private final PlayerTracker playerTracker;
@@ -38,7 +37,9 @@ public class Events implements Listener {
     public void loginEvent(PlayerLoginEvent event) {
         if (playerTracker.usingMYSQL) {
             if (!playerTracker.mysqlController.finishedSetup) {
-                event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "PlayerTracker has not finished setting up! Please wait a few.");
+                event.disallow(
+                        PlayerLoginEvent.Result.KICK_OTHER,
+                        "PlayerTracker has not finished setting up! Please wait a few.");
             }
         }
     }

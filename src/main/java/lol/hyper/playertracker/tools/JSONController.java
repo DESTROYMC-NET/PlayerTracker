@@ -33,17 +33,17 @@ import java.util.UUID;
 
 public class JSONController {
 
-    private final PlayerTracker playerTracker;
-
     private static FileWriter writer;
     private static FileReader reader;
+    private final PlayerTracker playerTracker;
 
     public JSONController(PlayerTracker playerTracker) {
         this.playerTracker = playerTracker;
     }
 
     private File getPlayerFile(UUID player) {
-        return Paths.get(playerTracker.dataFolder.toString(), player.toString() + ".json").toFile();
+        return Paths.get(playerTracker.dataFolder.toString(), player.toString() + ".json")
+                .toFile();
     }
 
     /**

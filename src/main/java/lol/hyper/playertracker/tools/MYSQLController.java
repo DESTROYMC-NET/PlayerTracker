@@ -28,17 +28,15 @@ import java.util.UUID;
 
 public class MYSQLController {
 
+    static String url;
+    public final HashMap<Player, Long> quitTasks = new HashMap<>();
+    public final HashMap<Player, Long> joinTasks = new HashMap<>();
     private final PlayerTracker playerTracker;
-
+    public Connection con;
+    public boolean finishedSetup = false;
     public MYSQLController(PlayerTracker playerTracker) {
         this.playerTracker = playerTracker;
     }
-
-    static String url;
-    public Connection con;
-    public boolean finishedSetup = false;
-    public final HashMap<Player, Long> quitTasks = new HashMap<>();
-    public final HashMap<Player, Long> joinTasks = new HashMap<>();
 
     private void buildURL() {
         String database = playerTracker.config.getString("mysql.database");
@@ -85,15 +83,17 @@ public class MYSQLController {
                 Bukkit.getLogger().info("[PlayerTracker] We found the correct table. Everything is good!");
             } else {
                 Bukkit.getLogger().info("[PlayerTracker] Creating table for players...");
-                String CREATE_TABLE = "CREATE TABLE `playerhistory` (" +
-                        "  `uuid` text NOT NULL," +
-                        "  `first_join` text NOT NULL," +
-                        "  `last_login` text NOT NULL" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+                String CREATE_TABLE = "CREATE TABLE `playerhistory` (" + "  `uuid` text NOT NULL,"
+                        + "  `first_join` text NOT NULL,"
+                        + "  `last_login` text NOT NULL"
+                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
                 Statement stmt = con.createStatement();
                 stmt.executeUpdate(CREATE_TABLE);
-                Bukkit.getLogger().info("[PlayerTracker] I created the tables! However, I'm going to import the player data!");
-                Bukkit.getLogger().info("[PlayerTracker] I will import from player data, which tracks this information. It shouldn't take long.");
+                Bukkit.getLogger()
+                        .info("[PlayerTracker] I created the tables! However, I'm going to import the player data!");
+                Bukkit.getLogger()
+                        .info(
+                                "[PlayerTracker] I will import from player data, which tracks this information. It shouldn't take long.");
                 int imported = 0;
                 for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
                     UUID uuid = player.getUniqueId();

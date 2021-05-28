@@ -32,19 +32,16 @@ import java.util.UUID;
 
 public class CommandPlayer implements CommandExecutor {
 
-    private final PlayerTracker playerTracker;
-
-    public CommandPlayer(PlayerTracker playerTracker) {
-        this.playerTracker = playerTracker;
-    }
-
     final String pattern = "MM/dd/yyyy HH:mm:ss";
     final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
+    private final PlayerTracker playerTracker;
     String joinDateString;
     Date joinDate;
     String lastPlayedString;
     Date lastPlayed;
+    public CommandPlayer(PlayerTracker playerTracker) {
+        this.playerTracker = playerTracker;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -57,16 +54,20 @@ public class CommandPlayer implements CommandExecutor {
                         sender.sendMessage(ChatColor.RED + "Player was not found. Maybe they changed their username?");
                         return true;
                     } else {
-                        lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpLastLogin(uuid))));
+                        lastPlayed = Date.from(Instant.ofEpochMilli(
+                                Long.parseLong(playerTracker.mysqlController.lookUpLastLogin(uuid))));
                         lastPlayedString = simpleDateFormat.format(lastPlayed);
-                        joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.mysqlController.lookUpFirstJoin(uuid))));
+                        joinDate = Date.from(Instant.ofEpochMilli(
+                                Long.parseLong(playerTracker.mysqlController.lookUpFirstJoin(uuid))));
                         joinDateString = simpleDateFormat.format(joinDate);
                         sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
-                        sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
+                        sender.sendMessage(
+                                ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
                         if (Bukkit.getServer().getPlayerExact(args[0]) != null && !PlayerTracker.isVanished(args[0])) {
                             sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " is currently online.\n");
                         } else {
-                            sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");
+                            sender.sendMessage(
+                                    ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");
                         }
                         sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                     }
@@ -82,16 +83,20 @@ public class CommandPlayer implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "Player was not found. Maybe they changed their username?");
                     return true;
                 } else {
-                    lastPlayed = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getLastLogin(uuid))));
+                    lastPlayed = Date.from(
+                            Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getLastLogin(uuid))));
                     lastPlayedString = simpleDateFormat.format(lastPlayed);
-                    joinDate = Date.from(Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getFirstJoin(uuid))));
+                    joinDate = Date.from(
+                            Instant.ofEpochMilli(Long.parseLong(playerTracker.jsonController.getFirstJoin(uuid))));
                     joinDateString = simpleDateFormat.format(joinDate);
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
-                    sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
+                    sender.sendMessage(
+                            ChatColor.DARK_AQUA + args[0] + " was first seen on " + joinDateString + " EST.");
                     if (Bukkit.getServer().getPlayerExact(args[0]) != null && !PlayerTracker.isVanished(args[0])) {
                         sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " is currently online.\n");
                     } else {
-                        sender.sendMessage(ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");
+                        sender.sendMessage(
+                                ChatColor.DARK_AQUA + args[0] + " was last seen on " + lastPlayedString + " EST.");
                     }
                     sender.sendMessage(ChatColor.GOLD + "--------------------------------------------");
                 }

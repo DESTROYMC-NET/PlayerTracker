@@ -38,10 +38,10 @@ import java.util.logging.Logger;
 
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
-    public FileConfiguration config;
     public final File configFile = new File(getDataFolder(), "config.yml");
     public final Path dataFolder = Paths.get(getDataFolder() + File.separator + "data");
     public final Logger logger = this.getLogger();
+    public FileConfiguration config;
     public boolean usingMYSQL = false;
 
     public CommandReload commandReload;
@@ -49,6 +49,23 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     public MYSQLController mysqlController;
     public Events events;
     public JSONController jsonController;
+
+    /**
+     * @param player player to check if vanished
+     * @return returns if player is vanished or not
+     */
+    public static boolean isVanished(String player) {
+        if (Bukkit.getPlayerExact(player) == null) {
+            return false;
+        } else {
+            Player player2 = Bukkit.getPlayerExact(player);
+            assert player2 != null;
+            for (MetadataValue meta : player2.getMetadata("vanished")) {
+                if (meta.asBoolean()) return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void onEnable() {
@@ -80,7 +97,8 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
         config = YamlConfiguration.loadConfiguration(file);
         if (config.getString("storage-type").equalsIgnoreCase("mysql")) {
             if (config.getString("mysql.database").equalsIgnoreCase("database")) {
-                logger.severe("It looks like you have not configured your database settings. Please edit your config.yml file!");
+                logger.severe(
+                        "It looks like you have not configured your database settings. Please edit your config.yml file!");
                 Bukkit.getPluginManager().disablePlugin(this);
             } else {
                 usingMYSQL = true;
@@ -101,22 +119,5 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
                 jsonController.convertBukkitToStorage();
             }
         }
-    }
-
-    /**
-     * @param player player to check if vanished
-     * @return returns if player is vanished or not
-     */
-    public static boolean isVanished(String player) {
-        if (Bukkit.getPlayerExact(player) == null) {
-            return false;
-        } else {
-            Player player2 = Bukkit.getPlayerExact(player);
-            assert player2 != null;
-            for (MetadataValue meta : player2.getMetadata("vanished")) {
-                if (meta.asBoolean()) return true;
-            }
-        }
-        return false;
     }
 }
