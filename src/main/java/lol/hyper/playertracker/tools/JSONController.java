@@ -31,7 +31,15 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-public record JSONController(PlayerTracker playerTracker) {
+public class JSONController {
+
+    private static FileWriter writer;
+    private static FileReader reader;
+    private final PlayerTracker playerTracker;
+
+    public JSONController(PlayerTracker playerTracker) {
+        this.playerTracker = playerTracker;
+    }
 
     private File getPlayerFile(UUID player) {
         return Paths.get(playerTracker.dataFolder.toString(), player.toString() + ".json")
@@ -40,7 +48,6 @@ public record JSONController(PlayerTracker playerTracker) {
 
     /**
      * Read data from JSON file.
-     *
      * @param file File to read data from.
      * @return JSONObject with JSON data.
      */
@@ -51,7 +58,7 @@ public record JSONController(PlayerTracker playerTracker) {
         JSONParser parser = new JSONParser();
         Object obj = null;
         try {
-            FileReader reader = new FileReader(file);
+            reader = new FileReader(file);
             obj = parser.parse(reader);
             reader.close();
         } catch (IOException | ParseException e) {
@@ -64,13 +71,12 @@ public record JSONController(PlayerTracker playerTracker) {
 
     /**
      * Write data to JSON file.
-     *
-     * @param file        File to write data to.
+     * @param file File to write data to.
      * @param jsonToWrite Data to write to file. This much be a JSON string.
      */
     private void writeFile(File file, String jsonToWrite) {
         try {
-            FileWriter writer = new FileWriter(file);
+            writer = new FileWriter(file);
             writer.write(jsonToWrite);
             writer.close();
         } catch (IOException e) {
