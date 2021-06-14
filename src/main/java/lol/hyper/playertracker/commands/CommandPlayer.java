@@ -39,6 +39,7 @@ public class CommandPlayer implements CommandExecutor {
     Date joinDate;
     String lastPlayedString;
     Date lastPlayed;
+
     public CommandPlayer(PlayerTracker playerTracker) {
         this.playerTracker = playerTracker;
     }
