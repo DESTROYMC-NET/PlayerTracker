@@ -24,13 +24,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class CommandReload implements CommandExecutor {
-
-    private final PlayerTracker playerTracker;
-
-    public CommandReload(PlayerTracker playerTracker) {
-        this.playerTracker = playerTracker;
-    }
+public record CommandReload(PlayerTracker playerTracker) implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {

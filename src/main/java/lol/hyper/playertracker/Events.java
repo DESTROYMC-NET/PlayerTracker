@@ -25,13 +25,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class Events implements Listener {
-
-    private final PlayerTracker playerTracker;
-
-    public Events(PlayerTracker playerTracker) {
-        this.playerTracker = playerTracker;
-    }
+public record Events(PlayerTracker playerTracker) implements Listener {
 
     @EventHandler
     public void loginEvent(PlayerLoginEvent event) {
