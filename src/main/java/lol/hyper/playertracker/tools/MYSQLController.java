@@ -120,7 +120,8 @@ public class MYSQLController {
             }
             if (quitTasks.size() != 0) {
                 for (Player player : quitTasks.keySet()) {
-                    updateLastLogin(player.getUniqueId());
+                    long time = quitTasks.get(player);
+                    updateLastLogin(player.getUniqueId(), time);
                     quitTasks.remove(player);
                 }
             }
@@ -153,9 +154,9 @@ public class MYSQLController {
         return em;
     }
 
-    public void updateLastLogin(UUID uuid) {
+    public void updateLastLogin(UUID uuid, long time) {
         String SQL_UPDATE = "UPDATE playerhistory SET last_login=? WHERE uuid=?";
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         try {
             preparedStatement = con.prepareStatement(SQL_UPDATE);
             preparedStatement.setString(1, Long.toString(System.currentTimeMillis()));
@@ -168,7 +169,7 @@ public class MYSQLController {
 
     public void addNewPlayer(UUID uuid, long time) {
         String SQL_UPDATE = "INSERT INTO playerhistory (uuid, first_join, last_login)" + "VALUES (?, ?, ?)";
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         try {
             preparedStatement = con.prepareStatement(SQL_UPDATE);
             preparedStatement.setString(1, uuid.toString());

@@ -33,6 +33,8 @@ import java.util.UUID;
 
 public class JSONController {
 
+    private static FileWriter writer;
+    private static FileReader reader;
     private final PlayerTracker playerTracker;
 
     public JSONController(PlayerTracker playerTracker) {
@@ -56,7 +58,7 @@ public class JSONController {
         JSONParser parser = new JSONParser();
         Object obj = null;
         try {
-            FileReader reader = new FileReader(file);
+            reader = new FileReader(file);
             obj = parser.parse(reader);
             reader.close();
         } catch (IOException | ParseException e) {
@@ -74,7 +76,7 @@ public class JSONController {
      */
     private void writeFile(File file, String jsonToWrite) {
         try {
-            FileWriter writer = new FileWriter(file);
+            writer = new FileWriter(file);
             writer.write(jsonToWrite);
             writer.close();
         } catch (IOException e) {
