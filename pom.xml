@@ -57,8 +57,8 @@
                         <configuration>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.json.simple</pattern>
-                                    <shadedPattern>lol.hyper.playertracker.jsonsimple</shadedPattern>
+                                    <pattern>org.json</pattern>
+                                    <shadedPattern>lol.hyper.playertracker.json</shadedPattern>
                                 </relocation>
                             </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -107,9 +107,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
         </dependency>
     </dependencies>
 </project>

@@ -20,27 +20,25 @@ package lol.hyper.playertracker.tools;
 import lol.hyper.playertracker.PlayerTracker;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.UUID;
 
 public class JSONController {
 
-    private static FileWriter writer;
-    private static FileReader reader;
     private final PlayerTracker playerTracker;
 
     public JSONController(PlayerTracker playerTracker) {
         this.playerTracker = playerTracker;
     }
 
+    /**
+     * Get the player's file.
+     * @param player Player to get file for.
+     * @return The file in our directory.
+     */
     private File getPlayerFile(UUID player) {
         return Paths.get(playerTracker.dataFolder.toString(), player.toString() + ".json")
                 .toFile();
@@ -52,21 +50,23 @@ public class JSONController {
      * @return JSONObject with JSON data.
      */
     private JSONObject readFile(File file) {
-        if (!file.exists()) {
-            return null;
-        }
-        JSONParser parser = new JSONParser();
-        Object obj = null;
+        JSONObject object = null;
         try {
-            reader = new FileReader(file);
-            obj = parser.parse(reader);
-            reader.close();
-        } catch (IOException | ParseException e) {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                line = br.readLine();
+            }
+            object = new JSONObject(sb.toString());
+            br.close();
+        } catch (Exception e) {
             playerTracker.logger.severe("Unable to read file " + file.getAbsolutePath());
             playerTracker.logger.severe("This is bad, really bad.");
             e.printStackTrace();
         }
-        return (JSONObject) obj;
+        return object;
     }
 
     /**
@@ -76,7 +76,7 @@ public class JSONController {
      */
     private void writeFile(File file, String jsonToWrite) {
         try {
-            writer = new FileWriter(file);
+            FileWriter writer = new FileWriter(file);
             writer.write(jsonToWrite);
             writer.close();
         } catch (IOException e) {
@@ -86,6 +86,9 @@ public class JSONController {
         }
     }
 
+    /**
+     * This will convert Bukkit's last login and logout times to our system.
+     */
     public void convertBukkitToStorage() {
         playerTracker.logger.info("Converting bukkit data to json storage...");
         int players = 0;
@@ -95,40 +98,63 @@ public class JSONController {
             JSONObject file = new JSONObject();
             file.put("firstlogin", firstJoin);
             file.put("lastlogin", lastJoin);
-            writeFile(getPlayerFile(player.getUniqueId()), file.toJSONString());
+            writeFile(getPlayerFile(player.getUniqueId()), file.toString());
             players++;
         }
         playerTracker.logger.info(players + " were converted.");
     }
 
+    /**
+     * Get a player's join time.
+     * @param player Player to check.
+     * @return Time in milliseconds of when player joined.
+     */
     public String getFirstJoin(UUID player) {
         File playerFile = getPlayerFile(player);
         JSONObject playerJSON = readFile(playerFile);
         return playerJSON.get("firstlogin").toString();
     }
 
+    /**
+     * Get a player's last login time.
+     * @param player Player to check.
+     * @return Time in milliseconds of when player last joined.
+     */
     public String getLastLogin(UUID player) {
         File playerFile = getPlayerFile(player);
         JSONObject playerJSON = readFile(playerFile);
         return playerJSON.get("lastlogin").toString();
     }
 
+    /**
+     * Updata a player's last login time.
+     * @param player Player to update.
+     */
     public void updateLastLogin(UUID player) {
         File playerFile = getPlayerFile(player);
         JSONObject playerJSON = readFile(playerFile);
         playerJSON.remove("lastlogin");
         playerJSON.put("lastlogin", Long.toString(System.currentTimeMillis()));
-        writeFile(playerFile, playerJSON.toJSONString());
+        writeFile(playerFile, playerJSON.toString());
     }
 
+    /**
+     * Create a new file for a new player. This will put the join and last login time to the same time.
+     * @param player Player to create file for.
+     */
     public void setFirstJoin(UUID player) {
         File playerFile = getPlayerFile(player);
         JSONObject playerJSON = new JSONObject();
         playerJSON.put("firstlogin", Long.toString(System.currentTimeMillis()));
         playerJSON.put("lastlogin", Long.toString(System.currentTimeMillis()));
-        writeFile(playerFile, playerJSON.toJSONString());
+        writeFile(playerFile, playerJSON.toString());
     }
 
+    /**
+     * Check if we have a player saved in our directory.
+     * @param player Player to check for.
+     * @return True if the player is there, false if the player is not there.
+     */
     public boolean doesPlayerExist(UUID player) {
         File[] listOfFiles = playerTracker.dataFolder.toFile().listFiles();
         for (File listOfFile : listOfFiles) {
