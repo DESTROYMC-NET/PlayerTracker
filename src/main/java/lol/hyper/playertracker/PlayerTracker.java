@@ -18,7 +18,6 @@
 package lol.hyper.playertracker;
 
 import lol.hyper.playertracker.commands.CommandPlayer;
-import lol.hyper.playertracker.commands.CommandReload;
 import lol.hyper.playertracker.tools.JSONController;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -35,24 +34,20 @@ import java.util.logging.Logger;
 
 public final class PlayerTracker extends JavaPlugin implements Listener {
 
-    public final File configFile = new File(getDataFolder(), "config.yml");
     public final Path dataFolder = Paths.get(getDataFolder() + File.separator + "data");
     public final Logger logger = this.getLogger();
 
-    public CommandReload commandReload;
     public CommandPlayer commandPlayer;
     public Events events;
     public JSONController jsonController;
 
     @Override
     public void onEnable() {
-        commandReload = new CommandReload(this);
         commandPlayer = new CommandPlayer(this);
         events = new Events(this);
         jsonController = new JSONController(this);
 
         this.getCommand("player").setExecutor(commandPlayer);
-        this.getCommand("ptreload").setExecutor(commandReload);
 
         Bukkit.getServer().getPluginManager().registerEvents(events, this);
 

@@ -6,8 +6,3 @@ author: hyperdefined
 commands:
   player:
     description: Shows join date and last login time.
-  ptreload:
-    description: Reload the config.
-permissions:
-  playertracker.reload:
-    default: op
