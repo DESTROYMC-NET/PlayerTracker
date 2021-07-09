@@ -22,7 +22,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class Events implements Listener {
@@ -34,38 +33,19 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void loginEvent(PlayerLoginEvent event) {
-        if (playerTracker.usingMYSQL) {
-            if (!playerTracker.mysqlController.finishedSetup) {
-                event.disallow(
-                        PlayerLoginEvent.Result.KICK_OTHER,
-                        "PlayerTracker has not finished setting up! Please wait a few.");
-            }
-        }
-    }
-
-    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPlayedBefore()) {
-            if (playerTracker.usingMYSQL) {
-                playerTracker.mysqlController.joinTasks.put(player, System.currentTimeMillis());
-            } else {
-                playerTracker.jsonController.setFirstJoin(player.getUniqueId());
-            }
-            Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
+            playerTracker.jsonController.setFirstJoin(player.getUniqueId());
         }
+        Bukkit.getLogger().info("Adding " + player.getName() + " to player database.");
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (!PlayerTracker.isVanished(player.getName())) {
-            if (playerTracker.usingMYSQL) {
-                playerTracker.mysqlController.quitTasks.put(player, System.currentTimeMillis());
-            } else {
-                playerTracker.jsonController.updateLastLogin(player.getUniqueId());
-            }
+            playerTracker.jsonController.updateLastLogin(player.getUniqueId());
         }
     }
 }

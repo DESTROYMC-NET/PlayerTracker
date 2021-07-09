@@ -20,10 +20,8 @@ package lol.hyper.playertracker;
 import lol.hyper.playertracker.commands.CommandPlayer;
 import lol.hyper.playertracker.commands.CommandReload;
 import lol.hyper.playertracker.tools.JSONController;
-import lol.hyper.playertracker.tools.MYSQLController;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.metadata.MetadataValue;
@@ -41,12 +39,9 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
     public final File configFile = new File(getDataFolder(), "config.yml");
     public final Path dataFolder = Paths.get(getDataFolder() + File.separator + "data");
     public final Logger logger = this.getLogger();
-    public FileConfiguration config;
-    public boolean usingMYSQL = false;
 
     public CommandReload commandReload;
     public CommandPlayer commandPlayer;
-    public MYSQLController mysqlController;
     public Events events;
     public JSONController jsonController;
 
@@ -69,55 +64,25 @@ public final class PlayerTracker extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        mysqlController = new MYSQLController(this);
         commandReload = new CommandReload(this);
         commandPlayer = new CommandPlayer(this);
         events = new Events(this);
         jsonController = new JSONController(this);
-        loadConfig(configFile);
+
         this.getCommand("player").setExecutor(commandPlayer);
         this.getCommand("ptreload").setExecutor(commandReload);
+
         Bukkit.getServer().getPluginManager().registerEvents(events, this);
-    }
 
-    @Override
-    public void onDisable() {
-        if (usingMYSQL) {
-            if (Bukkit.getOnlinePlayers().size() > 0) {
-                mysqlController.doTasks();
+        if (!dataFolder.toFile().exists()) {
+            try {
+                Files.createDirectory(dataFolder);
+            } catch (IOException e) {
+                logger.severe("Unable to create " + dataFolder.toAbsolutePath());
+                e.printStackTrace();
             }
-            mysqlController.disconnect();
-        }
-    }
-
-    public void loadConfig(File file) {
-        if (!configFile.exists()) {
-            this.saveResource("config.yml", true);
-        }
-        config = YamlConfiguration.loadConfiguration(file);
-        if (config.getString("storage-type").equalsIgnoreCase("mysql")) {
-            if (config.getString("mysql.database").equalsIgnoreCase("database")) {
-                logger.severe(
-                        "It looks like you have not configured your database settings. Please edit your config.yml file!");
-                Bukkit.getPluginManager().disablePlugin(this);
-            } else {
-                usingMYSQL = true;
-                mysqlController.connect();
-                Bukkit.getScheduler().runTaskLaterAsynchronously(this, mysqlController::databaseSetup, 100);
-                Bukkit.getScheduler().runTaskTimer(this, () -> mysqlController.doTasks(), 0, 120);
-            }
-        } else {
-            usingMYSQL = false;
-            if (!dataFolder.toFile().exists()) {
-                try {
-                    Files.createDirectory(dataFolder);
-                } catch (IOException e) {
-                    logger.severe("Unable to create " + dataFolder.toAbsolutePath());
-                    e.printStackTrace();
-                }
-                // convert bukkit -> json
-                jsonController.convertBukkitToStorage();
-            }
+            // convert bukkit -> json
+            jsonController.convertBukkitToStorage();
         }
     }
 }
